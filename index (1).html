@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Z-Wave — Computación Ubicua</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:       #0d0a1a;
+    --surface:  #130f24;
+    --card:     #1a1530;
+    --border:   #2a2248;
+    --purple:   #9b5de5;
+    --violet:   #c77dff;
+    --pink:     #f72585;
+    --indigo:   #4361ee;
+    --text:     #ede9f6;
+    --muted:    #7b6fa0;
+    --green:    #06d6a0;
+    --red:      #ef233c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 1rem 2.5rem;
+    background: rgba(13,10,26,.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--violet); }
+  .nav-pills { display:flex; gap:.5rem; }
+  .nav-pills a {
+    width:26px; height:5px; border-radius:999px;
+    background:var(--border); display:block; transition:background .25s, width .25s;
+  }
+  .nav-pills a.active { background:var(--purple); width:38px; }
+
+  /* SECTIONS */
+  section {
+    position:relative; z-index:1;
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding: 7rem 2rem 4rem;
+  }
+  .inner { width:100%; max-width:1080px; }
+
+  .eyebrow {
+    font-size:.72rem; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--purple); margin-bottom:.75rem;
+    display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before {
+    content:''; display:block; width:28px; height:2px;
+    background:linear-gradient(90deg,var(--pink),var(--purple)); border-radius:2px;
+  }
+  .section-title {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(2rem,5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:1.2rem;
+  }
+  .section-desc { color:var(--muted); font-size:1rem; line-height:1.75; max-width:600px; margin-bottom:2.5rem; }
+
+  /* HERO */
+  #s1 { text-align:center; background:radial-gradient(ellipse 80% 65% at 50% 40%, rgba(155,93,229,.12) 0%, transparent 65%); }
+  .hero-tag {
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:rgba(155,93,229,.12); border:1px solid rgba(155,93,229,.3);
+    border-radius:999px; padding:.4rem 1.2rem;
+    font-size:.78rem; color:var(--violet); margin-bottom:2rem; letter-spacing:.1em;
+  }
+  .hero-title {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(5.5rem,18vw,11rem); font-weight:900; line-height:.9;
+    background:linear-gradient(135deg,#fff 0%,var(--violet) 50%,var(--pink) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:1.5rem;
+  }
+  .hero-sub { font-size:clamp(1rem,2.5vw,1.3rem); color:var(--muted); margin-bottom:2.5rem; }
+  .hero-authors { display:flex; flex-wrap:wrap; justify-content:center; gap:.75rem; margin-bottom:2rem; }
+  .author-chip {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:999px; padding:.4rem 1rem; font-size:.82rem; color:var(--muted);
+  }
+  .orb {
+    position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:-1;
+    animation:drift 8s ease-in-out infinite alternate;
+  }
+  .orb1 { width:400px; height:400px; top:-10%; left:-10%; background:rgba(155,93,229,.15); }
+  .orb2 { width:350px; height:350px; bottom:-5%; right:-5%; background:rgba(247,37,133,.12); animation-delay:2s; }
+  @keyframes drift { 0%{transform:translate(0,0)} 100%{transform:translate(30px,20px)} }
+
+  /* CARDS */
+  .card {
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:1.75rem;
+    transition:border-color .25s, transform .25s; position:relative; overflow:hidden;
+  }
+  .card:hover { border-color:var(--purple); transform:translateY(-4px); }
+  .card-accent {
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,var(--pink),var(--purple),var(--indigo));
+    opacity:0; transition:opacity .25s;
+  }
+  .card:hover .card-accent { opacity:1; }
+
+  /* SLIDE 2 */
+  #s2 { background:var(--surface); }
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; }
+  @media(max-width:700px){ .two-col{grid-template-columns:1fr;} }
+  .big-stat {
+    background:var(--card); border:1px solid var(--border); border-radius:24px;
+    padding:3rem 2rem; text-align:center; position:relative; overflow:hidden;
+  }
+  .big-stat::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,rgba(155,93,229,.1),transparent 70%); }
+  .big-icon { font-size:4rem; margin-bottom:1rem; display:block; }
+  .big-num {
+    font-family:'Playfair Display',serif; font-size:3rem; font-weight:900;
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .big-label { color:var(--muted); font-size:.88rem; margin-top:.5rem; }
+
+  /* SLIDE 3 */
+  .why-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.25rem; margin-top:2.5rem; }
+  .why-icon {
+    width:48px; height:48px; border-radius:12px;
+    background:linear-gradient(135deg,var(--purple),var(--pink));
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; margin-bottom:1.25rem;
+  }
+  .why-title { font-size:1rem; font-weight:700; margin-bottom:.5rem; }
+  .why-desc { color:var(--muted); font-size:.88rem; line-height:1.6; }
+
+  /* SLIDE 4 */
+  #s4 { background:var(--surface); }
+  .chars-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:2.5rem; }
+  @media(max-width:700px){ .chars-grid{grid-template-columns:1fr;} }
+  .char-num {
+    font-family:'Playfair Display',serif; font-size:2.5rem; font-weight:900;
+    background:linear-gradient(135deg,var(--purple),var(--indigo));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1;
+    margin-bottom:.5rem;
+  }
+  .char-text { color:var(--muted); font-size:.88rem; line-height:1.5; }
+
+  /* SLIDE 5 — MESH */
+  .mesh-layout { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; margin-top:2.5rem; }
+  @media(max-width:700px){ .mesh-layout{grid-template-columns:1fr;} }
+  .mesh-visual { position:relative; height:280px; display:flex; align-items:center; justify-content:center; }
+  .mesh-node {
+    position:absolute; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.65rem; text-align:center; font-weight:600;
+  }
+  .mesh-node.hub {
+    width:80px; height:80px; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:linear-gradient(135deg,var(--purple),var(--pink));
+    color:#fff; font-size:.7rem; z-index:2; box-shadow:0 0 40px rgba(155,93,229,.5);
+  }
+  .mesh-node.dev {
+    width:56px; height:56px;
+    background:var(--card); border:1px solid var(--border); color:var(--muted); font-size:.6rem;
+  }
+  .mesh-node.dev:nth-child(2){ top:5%; left:50%; transform:translate(-50%,0); }
+  .mesh-node.dev:nth-child(3){ top:50%; left:5%; transform:translate(0,-50%); }
+  .mesh-node.dev:nth-child(4){ top:50%; right:5%; transform:translate(0,-50%); }
+  .mesh-node.dev:nth-child(5){ bottom:5%; left:20%; }
+  .mesh-node.dev:nth-child(6){ bottom:5%; right:20%; }
+  svg.mesh-lines { position:absolute; inset:0; width:100%; height:100%; }
+  svg.mesh-lines line { stroke:rgba(155,93,229,.25); stroke-width:1; stroke-dasharray:4 4; }
+
+  .how-steps { display:flex; flex-direction:column; gap:1rem; }
+  .how-step {
+    display:flex; gap:1rem; align-items:flex-start;
+    background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.2rem;
+    transition:border-color .25s;
+  }
+  .how-step:hover { border-color:var(--purple); }
+  .how-badge {
+    width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--purple),var(--indigo));
+    display:flex; align-items:center; justify-content:center;
+    font-size:.75rem; font-weight:700; color:#fff;
+  }
+  .how-text { font-size:.88rem; color:var(--muted); line-height:1.55; }
+  .how-text strong { color:var(--text); }
+
+  /* SLIDE 6 — PROS/CONS */
+  #s6 { background:var(--surface); }
+  .pc-layout { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:2.5rem; }
+  @media(max-width:700px){ .pc-layout{grid-template-columns:1fr;} }
+  .pc-col { display:flex; flex-direction:column; gap:.75rem; }
+  .pc-header {
+    font-size:.72rem; letter-spacing:.2em; text-transform:uppercase;
+    padding:.65rem 1rem; border-radius:8px; font-weight:700; display:flex; align-items:center; gap:.5rem;
+  }
+  .pc-header.pro { background:rgba(6,214,160,.1); color:var(--green); border:1px solid rgba(6,214,160,.2); }
+  .pc-header.con { background:rgba(239,35,60,.1); color:var(--red); border:1px solid rgba(239,35,60,.2); }
+  .pc-item {
+    display:flex; gap:.75rem; align-items:flex-start;
+    background:var(--card); border:1px solid var(--border); border-radius:10px;
+    padding:.9rem 1rem; font-size:.88rem; color:var(--muted); line-height:1.5;
+  }
+  .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:.3rem; }
+  .pro-dot { background:var(--green); }
+  .con-dot { background:var(--red); }
+
+  /* SLIDE 7 — TABLA */
+  .table-wrap { margin-top:2.5rem; overflow-x:auto; border-radius:16px; border:1px solid var(--border); overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:rgba(155,93,229,.12); }
+  th { padding:1rem 1.25rem; text-align:left; font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--violet); font-weight:700; border-bottom:1px solid var(--border); }
+  td { padding:.9rem 1.25rem; font-size:.9rem; color:var(--muted); border-bottom:1px solid var(--border); transition:background .2s; }
+  tbody tr:hover td { background:rgba(155,93,229,.05); }
+  tbody tr:last-child td { border-bottom:none; }
+  .highlight-row td { color:var(--text); }
+  .highlight-row td:first-child { color:var(--violet); font-weight:700; }
+  .badge { display:inline-block; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:600; }
+  .badge-hi  { background:rgba(239,35,60,.15);  color:var(--red); }
+  .badge-med { background:rgba(155,93,229,.15); color:var(--violet); }
+  .badge-low { background:rgba(6,214,160,.15);  color:var(--green); }
+
+  /* SLIDE 8 — CONCLUSIÓN */
+  #s8 { background:var(--surface); }
+  .conclusion-layout { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; }
+  @media(max-width:700px){ .conclusion-layout{grid-template-columns:1fr;} }
+  .conclusion-text p { color:var(--muted); line-height:1.8; font-size:.97rem; }
+  .conclusion-visual {
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:2.5rem 2rem; text-align:center; position:relative; overflow:hidden;
+  }
+  .conclusion-visual::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,rgba(155,93,229,.08),transparent 70%); }
+  .conclusion-icon { font-size:4rem; margin-bottom:1rem; display:block; }
+  .conclusion-quote { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--text); line-height:1.5; font-style:italic; }
+
+  /* CIERRE */
+  #s9 { text-align:center; background:radial-gradient(ellipse 70% 60% at 50% 45%, rgba(247,37,133,.08) 0%, transparent 65%); }
+  .outro-pre { font-size:.78rem; letter-spacing:.35em; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem; }
+  .outro-title {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(3rem,10vw,6.5rem); font-weight:900; line-height:1;
+    background:linear-gradient(135deg,#fff 10%,var(--violet) 50%,var(--pink) 90%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:1rem;
+  }
+  .outro-sub { color:var(--muted); font-size:1rem; margin-bottom:3rem; }
+  .attention-badge {
+    display:inline-flex; align-items:center; gap:.75rem;
+    border:1px solid rgba(155,93,229,.3); border-radius:999px;
+    padding:1rem 2.5rem; font-family:'Playfair Display',serif;
+    font-size:1.1rem; color:var(--violet);
+    animation:float 3.5s ease-in-out infinite;
+  }
+  @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+  footer { position:relative; z-index:1; text-align:center; padding:2rem; border-top:1px solid var(--border); font-size:.72rem; color:var(--muted); letter-spacing:.08em; }
+
+  .fade-up { opacity:0; transform:translateY(28px); transition:opacity .65s ease, transform .65s ease; }
+  .fade-up.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Z-Wave</div>
+  <div class="nav-pills" id="navPills">
+    <a href="#s1" class="active"></a>
+    <a href="#s2"></a>
+    <a href="#s3"></a>
+    <a href="#s4"></a>
+    <a href="#s5"></a>
+    <a href="#s6"></a>
+    <a href="#s7"></a>
+    <a href="#s8"></a>
+    <a href="#s9"></a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="s1">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="inner fade-up">
+    <div class="hero-tag">🏠 Computación Ubicua · 18.03.2026</div>
+    <h1 class="hero-title">Z-Wave</h1>
+    <p class="hero-sub">Protocolo inalámbrico para hogares inteligentes</p>
+    <div class="hero-authors">
+      <span class="author-chip">Karoll Lobo</span>
+      <span class="author-chip">Alberto Bermudez</span>
+      <span class="author-chip">Jorge Prado</span>
+      <span class="author-chip">Kevin Ruiz</span>
+      <span class="author-chip">Adrian Moreno</span>
+    </div>
+  </div>
+</section>
+
+<!-- QUÉ ES -->
+<section id="s2">
+  <div class="inner fade-up">
+    <p class="eyebrow">01 — Definición</p>
+    <div class="two-col">
+      <div>
+        <h2 class="section-title">¿Qué es Z-Wave?</h2>
+        <p class="section-desc">Z-Wave es un protocolo de comunicación inalámbrica usado en <strong style="color:var(--text)">hogares inteligentes</strong>. Permite que dispositivos como luces y sensores se comuniquen entre sí para automatizar funciones y crear sistemas de domótica dentro de la computación ubicua.</p>
+      </div>
+      <div class="big-stat">
+        <span class="big-icon">🏠</span>
+        <div class="big-num">Smart<br/>Home</div>
+        <div class="big-label">Protocolo líder en domótica residencial</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUÉ -->
+<section id="s3">
+  <div class="inner fade-up">
+    <p class="eyebrow">02 — Relevancia</p>
+    <h2 class="section-title">¿Por qué es importante en<br/>Computación Ubicua?</h2>
+    <p class="section-desc">La computación ubicua busca que la tecnología esté integrada en el entorno y funcione de forma <strong style="color:var(--text)">invisible para el usuario</strong>. Z-Wave encaja perfectamente porque:</p>
+    <div class="why-grid">
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="why-icon">🏡</div>
+        <h3 class="why-title">Automatización del hogar</h3>
+        <p class="why-desc">Permite controlar luces, cerraduras, termostatos y más desde un solo sistema integrado.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="why-icon">📡</div>
+        <h3 class="why-title">Comunicación autónoma</h3>
+        <p class="why-desc">Los dispositivos se comunican solos entre sí sin necesidad de intervención humana constante.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="why-icon">👤</div>
+        <h3 class="why-title">Invisible al usuario</h3>
+        <p class="why-desc">Funciona sin intervención constante del usuario — la tecnología desaparece en el entorno.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CARACTERÍSTICAS -->
+<section id="s4">
+  <div class="inner fade-up">
+    <p class="eyebrow">03 — Características</p>
+    <h2 class="section-title">Características de Z-Wave</h2>
+    <div class="chars-grid">
+      <div class="card" style="padding:1.5rem">
+        <div class="card-accent"></div>
+        <div class="char-num">01</div>
+        <p class="char-text">Tecnología inalámbrica diseñada específicamente para el <strong style="color:var(--text)">smart home</strong></p>
+      </div>
+      <div class="card" style="padding:1.5rem">
+        <div class="card-accent"></div>
+        <div class="char-num">02</div>
+        <p class="char-text">Requiere un <strong style="color:var(--text)">hub Z-Wave</strong> como punto central de control</p>
+      </div>
+      <div class="card" style="padding:1.5rem">
+        <div class="card-accent"></div>
+        <div class="char-num">03</div>
+        <p class="char-text">Utiliza <strong style="color:var(--text)">red de malla</strong> (Mesh Network) para mayor cobertura</p>
+      </div>
+      <div class="card" style="padding:1.5rem">
+        <div class="card-accent"></div>
+        <div class="char-num">04</div>
+        <p class="char-text"><strong style="color:var(--text)">Alta compatibilidad</strong> entre marcas y fabricantes</p>
+      </div>
+      <div class="card" style="padding:1.5rem">
+        <div class="card-accent"></div>
+        <div class="char-num">05</div>
+        <p class="char-text"><strong style="color:var(--text)">Bajo consumo</strong> de energía — larga duración de batería</p>
+      </div>
+      <div class="card" style="padding:1.5rem">
+        <div class="card-accent"></div>
+        <div class="char-num">06</div>
+        <p class="char-text"><strong style="color:var(--text)">Seguridad</strong> con cifrado AES-128 integrado</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section id="s5">
+  <div class="inner fade-up">
+    <p class="eyebrow">04 — Funcionamiento</p>
+    <h2 class="section-title">Cómo funciona Z-Wave</h2>
+    <div class="mesh-layout">
+      <div class="mesh-visual">
+        <svg class="mesh-lines" viewBox="0 0 300 280">
+          <line x1="150" y1="140" x2="150" y2="30"/>
+          <line x1="150" y1="140" x2="30"  y2="140"/>
+          <line x1="150" y1="140" x2="270" y2="140"/>
+          <line x1="150" y1="140" x2="80"  y2="230"/>
+          <line x1="150" y1="140" x2="220" y2="230"/>
+          <line x1="150" y1="30"  x2="30"  y2="140"/>
+          <line x1="150" y1="30"  x2="270" y2="140"/>
+          <line x1="30"  y1="140" x2="80"  y2="230"/>
+          <line x1="270" y1="140" x2="220" y2="230"/>
+        </svg>
+        <div class="mesh-node hub">HUB<br/>Z-Wave</div>
+        <div class="mesh-node dev">💡 Luz</div>
+        <div class="mesh-node dev">🔒 Lock</div>
+        <div class="mesh-node dev">🌡️ Temp</div>
+        <div class="mesh-node dev">🚪 Sensor</div>
+        <div class="mesh-node dev">🔌 Plug</div>
+      </div>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-badge">1</div>
+          <p class="how-text"><strong>Red de malla (Mesh):</strong> cada dispositivo puede retransmitir señales a otros dispositivos cercanos.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-badge">2</div>
+          <p class="how-text"><strong>Cobertura extendida:</strong> la información llega al controlador aunque esté lejos, saltando entre nodos.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-badge">3</div>
+          <p class="how-text"><strong>Frecuencia 868/908 MHz:</strong> evita interferencias con Wi-Fi y Bluetooth que usan 2.4 GHz.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROS & CONS -->
+<section id="s6">
+  <div class="inner fade-up">
+    <p class="eyebrow">05 — Análisis</p>
+    <h2 class="section-title">Pros y Contras</h2>
+    <div class="pc-layout">
+      <div class="pc-col">
+        <div class="pc-header pro">✅ Ventajas</div>
+        <div class="pc-item"><div class="dot pro-dot"></div>Protocolo estandarizado: dispositivos de <strong style="color:var(--text)">diferentes marcas</strong> pueden comunicarse.</div>
+        <div class="pc-item"><div class="dot pro-dot"></div>Comunicación <strong style="color:var(--text)">bidireccional</strong> que confirma las órdenes — muy fiable.</div>
+        <div class="pc-item"><div class="dot pro-dot"></div>Buen alcance y <strong style="color:var(--text)">poca interferencia</strong> usando frecuencia diferente al Wi-Fi.</div>
+        <div class="pc-item"><div class="dot pro-dot"></div><strong style="color:var(--text)">Bajo consumo</strong> — baterías duraderas en dispositivos pequeños.</div>
+      </div>
+      <div class="pc-col">
+        <div class="pc-header con">⚠️ Limitaciones</div>
+        <div class="pc-item"><div class="dot con-dot"></div><strong style="color:var(--text)">Precio elevado</strong> — tecnología de gama alta comparada con alternativas.</div>
+        <div class="pc-item"><div class="dot con-dot"></div>Requiere un <strong style="color:var(--text)">hub o controlador</strong> para conectarse a los dispositivos.</div>
+        <div class="pc-item"><div class="dot con-dot"></div>No se puede conectar <strong style="color:var(--text)">directamente al teléfono</strong> — los móviles no tienen antena Z-Wave.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARACIÓN -->
+<section id="s7">
+  <div class="inner fade-up">
+    <p class="eyebrow">06 — Comparación</p>
+    <h2 class="section-title">Comparación de Tecnologías</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tecnología</th>
+            <th>Uso Principal</th>
+            <th>Velocidad</th>
+            <th>Consumo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>📶 Wi-Fi</td>
+            <td>Internet / Streaming</td>
+            <td><span class="badge badge-hi">Alta</span></td>
+            <td><span class="badge badge-hi">Alto</span></td>
+          </tr>
+          <tr>
+            <td>🔵 Bluetooth</td>
+            <td>Dispositivos cercanos</td>
+            <td><span class="badge badge-med">Media</span></td>
+            <td><span class="badge badge-low">Bajo</span></td>
+          </tr>
+          <tr>
+            <td>🟡 Zigbee</td>
+            <td>Domótica</td>
+            <td><span class="badge badge-med">Media</span></td>
+            <td><span class="badge badge-low">Bajo</span></td>
+          </tr>
+          <tr class="highlight-row">
+            <td>🟣 Z-Wave</td>
+            <td>Domótica</td>
+            <td><span class="badge badge-med">Media</span></td>
+            <td><span class="badge badge-low">Muy bajo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSIÓN -->
+<section id="s8">
+  <div class="inner fade-up">
+    <p class="eyebrow">07 — Conclusión</p>
+    <div class="conclusion-layout">
+      <div class="conclusion-text">
+        <h2 class="section-title">Conclusión</h2>
+        <p>Z-Wave es una tecnología inalámbrica para hogares inteligentes que permite <strong style="color:var(--text)">conectar y automatizar dispositivos</strong> de forma segura y eficiente.</p>
+        <br/>
+        <p>Gracias a su <strong style="color:var(--text)">red de malla</strong> y <strong style="color:var(--text)">bajo consumo energético</strong>, es una opción confiable para sistemas de domótica y computación ubicua, integrando la tecnología de manera invisible en la vida cotidiana.</p>
+      </div>
+      <div class="conclusion-visual">
+        <span class="conclusion-icon">🏠</span>
+        <p class="conclusion-quote">"La mejor tecnología es la que se integra en tu vida sin que te des cuenta."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CIERRE -->
+<section id="s9">
+  <div class="orb orb1" style="opacity:.4"></div>
+  <div class="orb orb2" style="opacity:.4"></div>
+  <div class="inner fade-up" style="text-align:center">
+    <p class="outro-pre">Computación Ubicua · 2026</p>
+    <h2 class="outro-title">¡Gracias por<br/>su atención!</h2>
+    <p class="outro-sub">Z-Wave — Conectando el hogar del futuro</p>
+    <div class="attention-badge">💬 ¿Preguntas?</div>
+  </div>
+</section>
+
+<footer>
+  Z-Wave · Computación Ubicua · Karoll Lobo · Alberto Bermudez · Jorge Prado · Kevin Ruiz · Adrian Moreno
+</footer>
+
+<script>
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  const sections = document.querySelectorAll('section');
+  const pills = document.querySelectorAll('#navPills a');
+  const so = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        pills.forEach(p => p.classList.remove('active'));
+        const i = [...sections].indexOf(e.target);
+        if(pills[i]) pills[i].classList.add('active');
+      }
+    });
+  }, { threshold: 0.5 });
+  sections.forEach(s => so.observe(s));
+</script>
+</body>
+</html>
